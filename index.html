@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Waxy Finance">
+<meta name="theme-color" content="#0f2744">
+<title>Waxy Financial Statement</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh}
+.wrap{padding:.75rem;max-width:900px;margin:0 auto}
+.hdr{background:#0f2744;border-radius:12px;padding:12px 16px;margin-bottom:.75rem}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.hdr-title{color:#f0c050;font-size:17px;font-weight:600}
+.hdr-sub{color:#a0b8d0;font-size:10px;margin-top:2px}
+.hdr-controls{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:8px}
+.hdr-controls select,.hdr-controls input[type=number]{background:#1a3a5c;border:1px solid #2d5a8e;color:#e8d5a0;border-radius:8px;padding:5px 8px;font-size:12px}
+.ctrl-grp{display:flex;flex-direction:column;gap:2px}
+.ctrl-grp label{color:#a0b8d0;font-size:10px}
+.btn-gold{background:#f0c050;border:none;color:#0f2744;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-gold:hover{background:#f5d278}
+.btn-outline{background:none;border:1px solid #2d5a8e;color:#a0b8d0;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer}
+.btn-outline:hover{background:#1a3a5c}
+.btn-danger{background:none;border:1px solid #c0392b;color:#c0392b;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer}
+.btn-danger:hover{background:#fce8e8}
+.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+.card-head{background:#0f2744;padding:8px 12px;display:flex;align-items:center;justify-content:space-between}
+.card-head span{color:#f0c050;font-size:12px;font-weight:600}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{background:#e8f0f8;color:#0f2744;font-weight:600;padding:6px 7px;text-align:left;font-size:10px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+th.num,td.num{text-align:right}
+td{padding:4px 6px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:middle;font-size:10px}
+td.orange-lbl{background:#fff3e0;color:#b35c00;font-weight:600;font-size:10px}
+.tfoot-sum td{background:#e8f0f8;font-weight:700;color:#0f2744;font-size:11px;padding:6px 7px}
+.lbl-input{background:none;border:none;border-bottom:1px dashed #f0a030;color:#b35c00;font-weight:600;font-size:10px;width:100%;padding:1px 2px;font-family:inherit}
+.lbl-input:focus{outline:none;border-bottom-color:#0f2744;background:#fffbe8}
+td input[type=number]{width:100%;border:1px solid #cbd5e1;border-radius:4px;padding:3px 5px;font-size:10px;background:#f8fafc;color:#1e293b;text-align:right}
+td input[type=number]:focus{outline:none;border-color:#185fa5;box-shadow:0 0 0 2px rgba(24,95,165,.15)}
+td input[type=text]{width:100%;border:1px solid #cbd5e1;border-radius:4px;padding:3px 5px;font-size:10px;background:#f8fafc;color:#1e293b}
+td input[type=text]:focus{outline:none;border-color:#185fa5}
+td select{width:100%;border:1px solid #cbd5e1;border-radius:4px;padding:3px 4px;font-size:10px;background:#f8fafc;color:#1e293b}
+.diff-pos{color:#1a7a3a;font-weight:600}
+.diff-neg{color:#c0392b;font-weight:600}
+.diff-zero{color:#94a3b8}
+.add-row-btn{margin:6px 8px;display:flex;align-items:center;gap:5px;background:none;border:1px dashed #cbd5e1;color:#64748b;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;width:calc(100% - 16px)}
+.add-row-btn:hover{background:#f8fafc}
+.add-inc-btn{display:flex;align-items:center;gap:4px;background:none;border:1px dashed #f0a030;color:#b35c00;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:10px;margin:6px 8px}
+.add-inc-btn:hover{background:#fff3e0}
+.del-btn{background:none;border:none;color:#c0392b;cursor:pointer;padding:1px 3px;font-size:14px;opacity:.55}
+.del-btn:hover{opacity:1}
+.summary-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:10px}
+.sum-card{background:#0f2744;border-radius:8px;padding:9px 12px}
+.sum-label{color:#a0b8d0;font-size:10px;margin-bottom:3px}
+.sum-val{color:#f0c050;font-size:16px;font-weight:700}
+.sum-val.pos{color:#4ecb71}
+.sum-val.neg{color:#e8716b}
+.balance-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem}
+.bal-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px}
+.bal-label{color:#64748b;font-size:10px;margin-bottom:3px}
+.bal-val{color:#1e293b;font-size:15px;font-weight:700}
+.bal-val.pos{color:#1a7a3a}
+.bal-val.neg{color:#c0392b}
+.bal-sub{font-size:9px;color:#94a3b8;margin-top:3px}
+.chart-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:.75rem}
+.chart-head{color:#0f2744;font-size:12px;font-weight:600;margin-bottom:8px}
+.legend{display:flex;gap:12px;font-size:10px;color:#64748b;margin-bottom:6px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:3px}
+.legend-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.freeze-btn{background:none;border:1px solid #2d5a8e;color:#a0b8d0;border-radius:8px;padding:2px 7px;font-size:10px;cursor:pointer}
+.freeze-btn.on{background:#2d5a8e;color:#f0c050}
+.exp-wrap{overflow-x:auto}
+.history-bar{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;margin-bottom:.75rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.history-bar label{font-size:11px;color:#64748b;font-weight:600;white-space:nowrap}
+.month-pill{padding:4px 8px;border-radius:20px;font-size:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;display:inline-flex;align-items:center;gap:4px}
+.month-pill.active{background:#0f2744;color:#f0c050;border-color:#0f2744}
+.month-pill:hover:not(.active){background:#e8f0f8}
+.pill-del{background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;padding:0 1px;line-height:1;opacity:.7}
+.pill-del:hover{opacity:1}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f2744;color:#f0c050;padding:8px 20px;border-radius:20px;font-size:12px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.sync-panel{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:.75rem}
+.sync-panel-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.sync-panel-head h3{font-size:12px;font-weight:600;color:#0f2744}
+.sync-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn-upload{background:#185fa5;border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer}
+.btn-upload:hover{background:#1a6fbd}
+.btn-download{background:none;border:1px solid #185fa5;color:#185fa5;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer}
+.btn-download:hover{background:#e8f0f8}
+.btn-ms-signout{background:none;border:1px solid #e2e8f0;border-radius:8px;padding:5px 10px;font-size:11px;color:#c0392b;cursor:pointer}
+.btn-ms-signout:hover{background:#fce8e8}
+.sync-input{flex:1;min-width:200px;border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px;font-size:11px;color:#1e293b;background:#f8fafc}
+.sync-input:focus{outline:none;border-color:#185fa5}
+.sync-user{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0f9f0;border:1px solid #c3e6cb;border-radius:8px;font-size:11px;color:#1a7a3a;margin-bottom:8px;flex-wrap:wrap}
+.sync-status{font-size:10px;margin-top:8px;padding:7px 10px;border-radius:6px;line-height:1.6;display:none;white-space:pre-line}
+.sync-status.ok{background:#e8f5ee;color:#1a7a3a;display:block}
+.sync-status.err{background:#fce8e8;color:#c0392b;display:block}
+.sync-status.info{background:#e8f0f8;color:#185fa5;display:block}
+.token-help{display:none;margin-top:8px;font-size:10px;color:#64748b;line-height:1.7;background:#f8fafc;border-radius:8px;padding:10px}
+@media(max-width:640px){
+  .section-grid{grid-template-columns:1fr}
+  .balance-grid{grid-template-columns:1fr 1fr}
+  .hdr-controls{flex-direction:column;align-items:flex-start}
+  td,th{font-size:9px;padding:3px 4px}
+  .tfoot-sum td{font-size:10px}
+  .bal-val{font-size:13px}
+  .sum-val{font-size:14px}
+}
+@media(min-width:641px) and (max-width:900px){.section-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="hdr-title">💰 Waxy Financial Statement</div>
+      <div class="hdr-sub" id="syncStatusBadge">Data saved locally · not synced</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <button class="btn-outline" onclick="exportReport()">⬇ Export SVG</button>
+      <button class="btn-danger" onclick="clearMonth()">🗑 Clear</button>
+      <button class="btn-gold" onclick="saveData()">💾 Save</button>
+    </div>
+  </div>
+  <div class="hdr-controls">
+    <div class="ctrl-grp">
+      <label>Month</label>
+      <select id="monthSel"></select>
+    </div>
+    <div class="ctrl-grp">
+      <label>Year</label>
+      <select id="yearSel"></select>
+    </div>
+    <div class="ctrl-grp">
+      <label>Prior month balance (RWF)</label>
+      <input type="number" id="priorMonth" value="0" style="width:120px" oninput="recalc()">
+    </div>
+  </div>
+</div>
+
+<!-- SYNC PANEL -->
+<div class="sync-panel">
+  <div class="sync-panel-head">
+    <h3>☁ OneDrive Sync</h3>
+    <div class="sync-actions" id="syncActions"></div>
+  </div>
+  <div id="syncTokenRow" style="display:none;margin-bottom:8px">
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <input id="manualToken" type="password" class="sync-input" placeholder="Paste your Graph Explorer access token here">
+      <button class="btn-upload" onclick="applyToken()">Connect</button>
+      <button class="btn-outline" onclick="toggleTokenHelp()" style="font-size:10px">How?</button>
+    </div>
+    <div id="tokenHelp" class="token-help">
+      <strong style="color:#0f2744">Get a token with write access — 4 steps:</strong><br>
+      1. Go to <a href="https://aka.ms/ge" target="_blank" style="color:#185fa5;font-weight:600">aka.ms/ge</a> → Sign in with your Microsoft account<br>
+      2. Click <strong>Modify permissions</strong> tab → find <strong>Files.ReadWrite</strong> → click <strong>Consent</strong><br>
+      3. Click <strong>Access token</strong> tab → <strong>Copy</strong> the token<br>
+      4. Paste it above and click <strong>Connect</strong><br>
+      <span style="color:#c0392b">⚠ Tokens expire after ~60 min.</span>
+    </div>
+  </div>
+  <div id="syncUserInfo" style="display:none"></div>
+  <div id="syncStatus" class="sync-status"></div>
+</div>
+
+<!-- HISTORY -->
+<div class="history-bar">
+  <label>Saved months:</label>
+  <span id="historyPills" style="display:flex;gap:6px;flex-wrap:wrap">
+    <span style="font-size:10px;color:#94a3b8">No saved months yet</span>
+  </span>
+</div>
+
+<!-- INCOME + SUMMARY -->
+<div class="section-grid">
+  <div class="card">
+    <div class="card-head"><span>↓ Income</span></div>
+    <table>
+      <thead><tr>
+        <th style="width:90px">Source</th>
+        <th class="num">Projected (RWF)</th>
+        <th class="num">Actual (RWF)</th>
+        <th class="num" style="width:70px">Diff</th>
+      </tr></thead>
+      <tbody id="incomeBody"></tbody>
+      <tfoot><tr class="tfoot-sum">
+        <td>Total</td>
+        <td class="num" id="totIncProj">0</td>
+        <td class="num" id="totIncAct">0</td>
+        <td class="num" id="totIncDiff">0</td>
+      </tr></tfoot>
+    </table>
+    <button class="add-inc-btn" onclick="addIncRow()">+ Add income source</button>
+  </div>
+  <div class="card">
+    <div class="card-head"><span>◎ Expense summary</span></div>
+    <div class="summary-2">
+      <div class="sum-card"><div class="sum-label">Total projected</div><div class="sum-val" id="sTotProj">0</div></div>
+      <div class="sum-card"><div class="sum-label">Total actual</div><div class="sum-val" id="sTotAct">0</div></div>
+      <div class="sum-card"><div class="sum-label">Difference</div><div class="sum-val" id="sTotDiff">0</div></div>
+      <div class="sum-card"><div class="sum-label">Expense rows</div><div class="sum-val" id="sRowCount">0</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPENSES -->
+<div class="card" style="margin-bottom:.75rem">
+  <div class="card-head">
+    <span>≡ Expenses</span>
+    <button class="freeze-btn" id="freezeBtn" onclick="toggleFreeze()">Freeze header</button>
+  </div>
+  <div class="exp-wrap"><div id="expTableWrap">
+    <table style="min-width:620px">
+      <thead id="expHead"><tr>
+        <th style="width:120px">Category</th>
+        <th style="width:110px">Sub-category</th>
+        <th style="width:140px">Description</th>
+        <th class="num" style="width:100px">Projected (RWF)</th>
+        <th class="num" style="width:100px">Actual (RWF)</th>
+        <th class="num" style="width:75px">Difference</th>
+        <th style="width:28px"></th>
+      </tr></thead>
+      <tbody id="expBody"></tbody>
+      <tfoot><tr class="tfoot-sum">
+        <td colspan="3">Totals</td>
+        <td class="num" id="fTotProj">0</td>
+        <td class="num" id="fTotAct">0</td>
+        <td class="num" id="fTotDiff">0</td>
+        <td></td>
+      </tr></tfoot>
+    </table>
+  </div></div>
+  <button class="add-row-btn" onclick="addExpRow()">+ Add expense row</button>
+</div>
+
+<!-- BALANCE CARDS -->
+<div class="balance-grid">
+  <div class="bal-card"><div class="bal-label">Projected balance</div><div class="bal-val" id="bProj">0 RWF</div><div class="bal-sub">(Projected income + Prior month) − Projected expenses</div></div>
+  <div class="bal-card"><div class="bal-label">Actual balance</div><div class="bal-val" id="bAct">0 RWF</div><div class="bal-sub">Actual income − Actual expenses</div></div>
+  <div class="bal-card"><div class="bal-label">Balance difference</div><div class="bal-val" id="bDiff">0 RWF</div><div class="bal-sub">Projected balance − Actual balance</div></div>
+</div>
+
+<!-- CHART -->
+<div class="chart-card">
+  <div class="chart-head">📊 Projected vs actual by category</div>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#185fa5"></span>Projected</span>
+    <span><span class="legend-dot" style="background:#e8716b"></span>Actual</span>
+  </div>
+  <div style="position:relative;width:100%;height:200px">
+    <canvas id="catChart"></canvas>
+  </div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ─── CONSTANTS ─────────────────────────────────────────────────
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const CATS = {
+  TRANSPORT:['MOTO','TAP&GO','TRAVEL'],
+  INSURANCE:['SANLAM','CBHI','EDENCARE'],
+  FOOD:['GROCERIES','STOCK'],
+  'PERSONAL CARE':['HAIR/NAILS','DINING OUT','CLOTHING','GADGET','GYM'],
+  MAINTENANCE:['CAR','HOUSE','WIFE','E-BIKE'],
+  ENTERTAINMENT:['SUBSCRIPTION','EVENTS'],
+  HOUSING:['RENT','GAS','ELECTRICITY','WATER','SECURITY','CLEANING'],
+  'SAVINGS/INVESTMENT':['EQUITY (E-Fund)','MOKASH (Short-Term)','OKX (Investment)','FAMILY FUND'],
+  'GIFTS/DONATION':['CHARITY','WEDDING'],
+  LEGAL:['IREMBO','ATTORNEY'],
+  LOANS:['BPR','I&M','CBA','Ow2P'],
+  TAXES:['BUSINESS']
+};
+
+const OD_FILE = 'waxy_finance.json';
+
+// ─── GLOBALS ───────────────────────────────────────────────────
+let catChart = null, frozen = false, incCount = 0, syncTimer = null;
+let accessToken = null;
+let _state = {tIP:0,tIA:0,tEP:0,tEA:0,prior:0,catMap:{},pB:0,aB:0,dB:0,incRows:[]};
+
+// ─── INIT DROPDOWNS (DOM is ready since script is at bottom) ───
+(function initSelectors(){
+  const mSel = document.getElementById('monthSel');
+  const ySel = document.getElementById('yearSel');
+  const now  = new Date();
+  MONTHS.forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = m; o.textContent = m;
+    if (i === now.getMonth()) o.selected = true;
+    mSel.appendChild(o);
+  });
+  for (let y = now.getFullYear() - 2; y <= now.getFullYear() + 2; y++) {
+    const o = document.createElement('option');
+    o.value = String(y); o.textContent = String(y);
+    if (y === now.getFullYear()) o.selected = true;
+    ySel.appendChild(o);
+  }
+  mSel.addEventListener('change', switchMonth);
+  ySel.addEventListener('change', switchMonth);
+})();
+
+// ─── UTILS ─────────────────────────────────────────────────────
+const fmt = n => new Intl.NumberFormat('en-RW',{minimumFractionDigits:0,maximumFractionDigits:0}).format(Math.round(n));
+function setDiff(el,v){el.textContent=fmt(v);el.className='num '+(v>0?'diff-pos':v<0?'diff-neg':'diff-zero');}
+function toast(msg,dur=2400){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function setSyncStatus(msg,type){const el=document.getElementById('syncStatus');el.textContent=msg;el.className='sync-status '+type;}
+function currentKey(){return 'waxy_'+document.getElementById('monthSel').value+'_'+document.getElementById('yearSel').value;}
+function prevMonthKey(){
+  let idx = MONTHS.indexOf(document.getElementById('monthSel').value) - 1;
+  let y   = parseInt(document.getElementById('yearSel').value);
+  if(idx < 0){idx = 11; y--;}
+  return 'waxy_' + MONTHS[idx] + '_' + y;
+}
+
+// ─── DATA COLLECT / SAVE / LOAD ────────────────────────────────
+function collectData(){
+  return {
+    prior: parseFloat(document.getElementById('priorMonth').value)||0,
+    incRows: [...document.querySelectorAll('#incomeBody tr')].map(r=>({
+      name: r.querySelector('.lbl-input').value,
+      proj: parseFloat(r.querySelector('.inc-proj').value)||0,
+      act:  parseFloat(r.querySelector('.inc-act').value)||0
+    })),
+    expRows: [...document.querySelectorAll('#expBody tr')].map(r=>({
+      cat:  r.querySelectorAll('select')[0].value,
+      sub:  r.querySelectorAll('select')[1].value,
+      desc: r.querySelector('.exp-desc')?r.querySelector('.exp-desc').value:'',
+      proj: parseFloat(r.querySelector('.exp-proj').value)||0,
+      act:  parseFloat(r.querySelector('.exp-act').value)||0
+    }))
+  };
+}
+
+function saveData(){
+  try{localStorage.setItem(currentKey(),JSON.stringify(collectData()));refreshHistory();toast('Saved ✓');}
+  catch(e){toast('Save failed: '+e.message);}
+}
+
+function loadData(data){
+  document.getElementById('incomeBody').innerHTML='';
+  document.getElementById('expBody').innerHTML='';
+  incCount = 0;
+  document.getElementById('priorMonth').value = data.prior||0;
+  const incArr = (data.incRows&&data.incRows.length) ? data.incRows : [{name:'Salary',proj:0,act:0},{name:'Side income',proj:0,act:0}];
+  incArr.forEach(r => addIncRow(r.name, r.proj, r.act));
+  const expArr = (data.expRows&&data.expRows.length) ? data.expRows : [];
+  expArr.forEach(r => addExpRow(r.cat, r.sub, r.desc, r.proj, r.act));
+  if(!expArr.length){addExpRow();addExpRow();addExpRow();}
+  recalc();
+}
+
+// ─── PRIOR MONTH BALANCE CALC ──────────────────────────────────
+function getPrevBalanceDiff(){
+  const saved = localStorage.getItem(prevMonthKey());
+  if(!saved) return null;
+  try{
+    const d = JSON.parse(saved);
+    const prior = d.prior||0;
+    const tIP = (d.incRows||[]).reduce((s,r)=>s+(r.proj||0),0);
+    const tEP = (d.expRows||[]).reduce((s,r)=>s+(r.proj||0),0);
+    const pB  = (tIP + prior) - tEP;
+    const tIA = (d.incRows||[]).reduce((s,r)=>s+(r.act||0),0);
+    const tEA = (d.expRows||[]).reduce((s,r)=>s+(r.act||0),0);
+    const aB  = tIA - tEA;
+    return pB - aB;
+  }catch(e){return null;}
+}
+
+// ─── SWITCH MONTH ──────────────────────────────────────────────
+let currentMonthKey = null; // tracks which month is currently loaded
+
+function switchMonth(){
+  // Save the month we're LEAVING (only if one was loaded)
+  if(currentMonthKey){
+    try{localStorage.setItem(currentMonthKey, JSON.stringify(collectData()));}catch(e){}
+  }
+  // Now update to the new key
+  currentMonthKey = currentKey();
+  const saved = localStorage.getItem(currentMonthKey);
+  if(saved){
+    loadData(JSON.parse(saved));
+  } else {
+    // Brand new month — blank slate, only carry prior balance diff
+    const prevDiff = getPrevBalanceDiff();
+    loadData({prior: prevDiff !== null ? prevDiff : 0, incRows:[], expRows:[]});
+  }
+  refreshHistory();
+}
+
+// ─── HISTORY ───────────────────────────────────────────────────
+function refreshHistory(){
+  const pills = document.getElementById('historyPills');
+  const keys  = Object.keys(localStorage).filter(k=>k.startsWith('waxy_')&&k!=='waxy_od_token').sort();
+  if(!keys.length){
+    pills.innerHTML='<span style="font-size:10px;color:#94a3b8">No saved months yet</span>';
+    return;
+  }
+  pills.innerHTML = keys.map(k=>{
+    const parts  = k.replace('waxy_','').split('_');
+    const label  = parts[0]+' '+parts[1];
+    const active = k === currentKey();
+    return `<span class="month-pill${active?' active':''}">
+      <span onclick="jumpTo('${parts[0]}','${parts[1]}')" style="cursor:pointer">${label}</span>
+      ${!active?`<button class="pill-del" onclick="deleteMonth('${k}')" title="Delete ${label}">✕</button>`:''}
+    </span>`;
+  }).join('');
+}
+
+function jumpTo(month,year){
+  document.getElementById('monthSel').value = month;
+  document.getElementById('yearSel').value  = year;
+  switchMonth();
+}
+
+function clearMonth(){
+  if(!confirm('Clear all data for this month?'))return;
+  localStorage.removeItem(currentKey());
+  loadData({prior:0,incRows:[],expRows:[]});
+  refreshHistory();
+  toast('Month cleared');
+}
+
+function deleteMonth(key){
+  const label = key.replace('waxy_','').replace('_',' ');
+  if(!confirm('Delete all data for '+label+'? This cannot be undone.'))return;
+  localStorage.removeItem(key);
+  refreshHistory();
+  triggerAutoSync();
+  toast(label+' deleted');
+}
+
+// ─── ADD ROWS ──────────────────────────────────────────────────
+function addIncRow(name,proj,act){
+  incCount++;
+  const tb = document.getElementById('incomeBody');
+  const tr = document.createElement('tr');
+  const def = name||(incCount===1?'Salary':incCount===2?'Side income':'Income '+incCount);
+  tr.innerHTML = `<td class="orange-lbl"><input class="lbl-input" type="text" value="${def}" placeholder="Source" oninput="recalc()"></td><td><input type="number" class="inc-proj" value="${proj||0}" oninput="recalc()"></td><td><input type="number" class="inc-act" value="${act||0}" oninput="recalc()"></td><td class="num diff-zero inc-diff">0</td>`;
+  tb.appendChild(tr);
+}
+
+function addExpRow(cat,sub,desc,proj,act){
+  const tb = document.getElementById('expBody');
+  const tr = document.createElement('tr');
+  const catOpts = Object.keys(CATS).map(c=>`<option${c===cat?' selected':''}>${c}</option>`).join('');
+  tr.innerHTML = `<td><select onchange="updateSub(this)">${catOpts}</select></td><td><select></select></td><td><input type="text" class="exp-desc" value="${desc||''}" placeholder="e.g. Monthly rent" oninput="recalc()"></td><td><input type="number" class="exp-proj" value="${proj||0}" oninput="recalc()"></td><td><input type="number" class="exp-act" value="${act||0}" oninput="recalc()"></td><td class="num diff-zero exp-diff">0</td><td><button class="del-btn" onclick="delRow(this)">✕</button></td>`;
+  tb.appendChild(tr);
+  updateSub(tr.querySelector('select'), sub);
+}
+
+function updateSub(sel, presub){
+  const subSel = sel.closest('tr').querySelectorAll('select')[1];
+  subSel.innerHTML = (CATS[sel.value]||[]).map(s=>`<option${s===presub?' selected':''}>${s}</option>`).join('');
+}
+
+function delRow(btn){btn.closest('tr').remove();recalc();}
+
+function toggleFreeze(){
+  frozen = !frozen;
+  const btn=document.getElementById('freezeBtn'),wrap=document.getElementById('expTableWrap'),head=document.getElementById('expHead');
+  if(frozen){wrap.style.maxHeight='200px';wrap.style.overflowY='auto';btn.classList.add('on');btn.textContent='Unfreeze';head.style.position='sticky';head.style.top='0';head.style.zIndex='2';head.style.background='#e8f0f8';}
+  else{wrap.style.maxHeight='';wrap.style.overflowY='';btn.classList.remove('on');btn.textContent='Freeze header';head.style.position='';}
+}
+
+// ─── RECALC ────────────────────────────────────────────────────
+function recalc(){
+  const prior = parseFloat(document.getElementById('priorMonth').value)||0;
+  const iRows = document.querySelectorAll('#incomeBody tr');
+  let tIP=0, tIA=0;
+  iRows.forEach(r=>{
+    const p=parseFloat(r.querySelector('.inc-proj').value)||0, a=parseFloat(r.querySelector('.inc-act').value)||0;
+    tIP+=p; tIA+=a; setDiff(r.querySelector('.inc-diff'),p-a);
+  });
+  document.getElementById('totIncProj').textContent=fmt(tIP);
+  document.getElementById('totIncAct').textContent=fmt(tIA);
+  setDiff(document.getElementById('totIncDiff'),tIP-tIA);
+  const eRows = document.querySelectorAll('#expBody tr');
+  let tEP=0, tEA=0, catMap={};
+  eRows.forEach(r=>{
+    const p=parseFloat(r.querySelector('.exp-proj').value)||0, a=parseFloat(r.querySelector('.exp-act').value)||0, cat=r.querySelectorAll('select')[0].value;
+    tEP+=p; tEA+=a; setDiff(r.querySelector('.exp-diff'),p-a);
+    if(!catMap[cat])catMap[cat]={p:0,a:0}; catMap[cat].p+=p; catMap[cat].a+=a;
+  });
+  document.getElementById('fTotProj').textContent=fmt(tEP);
+  document.getElementById('fTotAct').textContent=fmt(tEA);
+  setDiff(document.getElementById('fTotDiff'),tEP-tEA);
+  document.getElementById('sTotProj').textContent=fmt(tEP);
+  document.getElementById('sTotAct').textContent=fmt(tEA);
+  document.getElementById('sRowCount').textContent=eRows.length;
+  const eDiff=tEP-tEA, sdEl=document.getElementById('sTotDiff');
+  sdEl.textContent=fmt(eDiff); sdEl.className='sum-val'+(eDiff>0?' pos':eDiff<0?' neg':'');
+  const pB=(tIP+prior)-tEP, aB=tIA-tEA, dB=pB-aB;
+  const bP=document.getElementById('bProj'); bP.textContent=fmt(pB)+' RWF'; bP.className='bal-val'+(pB>=0?' pos':' neg');
+  const bA=document.getElementById('bAct');  bA.textContent=fmt(aB)+' RWF'; bA.className='bal-val'+(aB>=0?' pos':' neg');
+  const bD=document.getElementById('bDiff'); bD.textContent=fmt(dB)+' RWF'; bD.className='bal-val'+(dB>=0?' pos':' neg');
+  _state={tIP,tIA,tEP,tEA,prior,catMap,pB,aB,dB,incRows:[...iRows].map(r=>({name:r.querySelector('.lbl-input').value,proj:parseFloat(r.querySelector('.inc-proj').value)||0,act:parseFloat(r.querySelector('.inc-act').value)||0}))};
+  updateChart(catMap);
+  triggerAutoSync();
+}
+
+// ─── CHART ─────────────────────────────────────────────────────
+function updateChart(catMap){
+  const labels=Object.keys(catMap), proj=labels.map(c=>catMap[c].p), act=labels.map(c=>catMap[c].a);
+  if(catChart){catChart.destroy();catChart=null;}
+  if(!labels.length)return;
+  catChart=new Chart(document.getElementById('catChart').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Projected',data:proj,backgroundColor:'#185fa5',borderRadius:3,borderSkipped:false},{label:'Actual',data:act,backgroundColor:'#e8716b',borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': RWF '+fmt(c.raw)}}},scales:{x:{ticks:{font:{size:9},autoSkip:false,maxRotation:35},grid:{display:false}},y:{ticks:{callback:v=>'RWF '+fmt(v),font:{size:9}},grid:{color:'rgba(0,0,0,.06)'}}}}});
+}
+
+// ─── AUTO SYNC ─────────────────────────────────────────────────
+function triggerAutoSync(){
+  // Always persist current DOM state to localStorage first
+  const ck = currentKey();
+  const current = collectData();
+  try{localStorage.setItem(ck, JSON.stringify(current));refreshHistory();}catch(e){}
+  if(!accessToken)return;
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(async()=>{
+    const badge=document.getElementById('syncStatusBadge');
+    badge.textContent='☁ Syncing…';
+    const allData={};
+    Object.keys(localStorage).filter(k=>k.startsWith('waxy_')&&k!=='waxy_od_token').forEach(k=>{try{allData[k]=JSON.parse(localStorage.getItem(k));}catch(e){}});
+    // Ensure current month is always included with latest DOM data
+    allData[ck]=current;
+    try{
+      const res=await fetch(`https://graph.microsoft.com/v1.0/me/drive/root:/${OD_FILE}:/content`,{method:'PUT',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({waxy:allData,lastSync:new Date().toISOString()})});
+      if(res.ok){badge.textContent='☁ Synced · '+new Date().toLocaleTimeString();}
+      else if(res.status===401||res.status===403){badge.textContent='⚠ Token expired — reconnect';accessToken=null;localStorage.removeItem('waxy_od_token');renderSyncPanel(false);setSyncStatus('Token expired. Get a fresh one from aka.ms/ge','err');}
+      else{badge.textContent='⚠ Sync failed';}
+    }catch(e){badge.textContent='⚠ Sync error';}
+  },2000);
+}
+
+// ─── SYNC PANEL ────────────────────────────────────────────────
+function renderSyncPanel(connected, userHint){
+  const actions=document.getElementById('syncActions');
+  const tokenRow=document.getElementById('syncTokenRow');
+  const userInfo=document.getElementById('syncUserInfo');
+  if(connected){
+    tokenRow.style.display='none';
+    userInfo.style.display='block';
+    userInfo.innerHTML=`<div class="sync-user">✅ Token connected${userHint?' · <strong>'+userHint+'</strong>':''} <button class="btn-ms-signout" onclick="disconnectToken()">Disconnect</button></div>`;
+    actions.innerHTML=`<button class="btn-upload" onclick="syncUpload()">⬆ Upload</button><button class="btn-download" onclick="syncDownload()">⬇ Download</button>`;
+    document.getElementById('syncStatusBadge').textContent='☁ Connected to OneDrive';
+  } else {
+    userInfo.style.display='none';
+    tokenRow.style.display='block';
+    actions.innerHTML='';
+    document.getElementById('syncStatusBadge').textContent='Data saved locally · not synced';
+  }
+}
+
+function toggleTokenHelp(){const el=document.getElementById('tokenHelp');el.style.display=el.style.display==='none'?'block':'none';}
+
+async function applyToken(){
+  const raw=document.getElementById('manualToken').value.trim();
+  if(!raw){setSyncStatus('Please paste your access token first.','err');return;}
+  setSyncStatus('Verifying token and permissions…','info');
+  try{
+    const meRes=await fetch('https://graph.microsoft.com/v1.0/me',{headers:{'Authorization':'Bearer '+raw}});
+    if(!meRes.ok){setSyncStatus('❌ Invalid or expired token. Get a fresh one from aka.ms/ge','err');return;}
+    const me=await meRes.json();
+    const testRes=await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/waxy_test.tmp:/content',{method:'PUT',headers:{'Authorization':'Bearer '+raw,'Content-Type':'text/plain'},body:'ok'});
+    if(testRes.status===401||testRes.status===403){
+      setSyncStatus('❌ Token missing write permission.\n1. In Graph Explorer → Modify permissions tab\n2. Enable Files.ReadWrite → Consent\n3. Copy new Access token and paste again.','err');
+      document.getElementById('tokenHelp').style.display='block';
+      return;
+    }
+    fetch('https://graph.microsoft.com/v1.0/me/drive/root:/waxy_test.tmp',{method:'DELETE',headers:{'Authorization':'Bearer '+raw}}).catch(()=>{});
+    accessToken=raw;
+    localStorage.setItem('waxy_od_token',raw);
+    renderSyncPanel(true,me.userPrincipalName||me.mail||'');
+    setSyncStatus('✅ Connected as '+(me.displayName||me.userPrincipalName)+' · write access confirmed','ok');
+    toast('OneDrive connected ✓');
+  }catch(e){setSyncStatus('Network error: '+e.message,'err');}
+}
+
+function disconnectToken(){accessToken=null;localStorage.removeItem('waxy_od_token');document.getElementById('manualToken').value='';renderSyncPanel(false);setSyncStatus('Disconnected.','info');}
+
+async function syncUpload(){
+  if(!accessToken){setSyncStatus('Token expired. Paste a new one.','err');renderSyncPanel(false);return;}
+  setSyncStatus('Uploading…','info');
+  // Force-save current month DOM state before building upload payload
+  const ck = currentKey();
+  const current = collectData();
+  try{localStorage.setItem(ck, JSON.stringify(current));}catch(e){}
+  const allData={};
+  Object.keys(localStorage).filter(k=>k.startsWith('waxy_')&&k!=='waxy_od_token').forEach(k=>{try{allData[k]=JSON.parse(localStorage.getItem(k));}catch(e){}});
+  allData[ck]=current;
+  try{
+    const res=await fetch(`https://graph.microsoft.com/v1.0/me/drive/root:/${OD_FILE}:/content`,{method:'PUT',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({waxy:allData,lastSync:new Date().toISOString()})});
+    if(res.ok){Object.entries(allData).forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)));refreshHistory();setSyncStatus('✅ Uploaded at '+new Date().toLocaleTimeString(),'ok');toast('Synced ✓');}
+    else if(res.status===401){setSyncStatus('Token expired. Get a fresh one.','err');accessToken=null;localStorage.removeItem('waxy_od_token');renderSyncPanel(false);}
+    else{const err=await res.json().catch(()=>({}));setSyncStatus('Upload failed: '+(err.error?.message||res.status),'err');}
+  }catch(e){setSyncStatus('Network error: '+e.message,'err');}
+}
+
+async function syncDownload(){
+  if(!accessToken){setSyncStatus('Token expired. Paste a new one.','err');renderSyncPanel(false);return;}
+  setSyncStatus('Downloading…','info');
+  try{
+    const res=await fetch(`https://graph.microsoft.com/v1.0/me/drive/root:/${OD_FILE}:/content`,{headers:{'Authorization':'Bearer '+accessToken}});
+    if(res.ok){const json=await res.json();Object.entries(json.waxy||{}).forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)));refreshHistory();switchMonth();setSyncStatus('✅ Downloaded at '+new Date().toLocaleTimeString(),'ok');toast('Downloaded ✓');}
+    else if(res.status===404){setSyncStatus('No backup found on OneDrive yet. Upload first.','err');}
+    else if(res.status===401){setSyncStatus('Token expired. Get a fresh one.','err');renderSyncPanel(false);}
+    else{setSyncStatus('Download failed: '+res.status,'err');}
+  }catch(e){setSyncStatus('Network error: '+e.message,'err');}
+}
+
+// ─── EXPORT SVG ────────────────────────────────────────────────
+function exportReport(){
+  const s=_state, month=document.getElementById('monthSel').value, year=document.getElementById('yearSel').value;
+  const pB=s.pB||0, aB=s.aB||0, dB=s.dB||0, prior=s.prior||0;
+  const status=pB>=0&&aB>=0?'On Track':aB<0?'Over Budget':'Watch Spending';
+  const sc=status==='On Track'?'#1a7a3a':status==='Over Budget'?'#c0392b':'#b35c00';
+  const catLabels=Object.keys(s.catMap||{});
+  const maxV=Math.max(1,...catLabels.map(c=>Math.max(s.catMap[c].p,s.catMap[c].a)));
+  const BW=340,BH=18,BG=10;
+  const catRows=catLabels.map((cat,i)=>{const p=s.catMap[cat].p,a=s.catMap[cat].a,pw=Math.round(p/maxV*BW),aw=Math.round(a/maxV*BW),y=i*(BH*2+BG+4);return `<text x="0" y="${y+13}" font-size="9" fill="#6b7a8d" font-family="Arial">${cat}</text><rect x="0" y="${y+18}" width="${pw}" height="${BH}" rx="3" fill="#185fa5" opacity=".85"/><rect x="0" y="${y+18+BH+2}" width="${aw}" height="${BH}" rx="3" fill="#e8716b" opacity=".85"/><text x="${pw+4}" y="${y+18+BH-4}" font-size="8" fill="#185fa5" font-family="Arial">${fmt(p)}</text><text x="${aw+4}" y="${y+18+BH*2}" font-size="8" fill="#c0392b" font-family="Arial">${fmt(a)}</text>`;}).join('');
+  const chartH=catLabels.length*(BH*2+BG+4)+10, incH=(s.incRows||[]).length*22+10;
+  const incSvg=(s.incRows||[]).map((r,i)=>{const diff=r.proj-r.act,dc=diff>=0?'#1a7a3a':'#c0392b',y=i*22;return `<text x="0" y="${y+12}" font-size="10" fill="#334155" font-family="Arial">${r.name}</text><text x="210" y="${y+12}" font-size="10" fill="#185fa5" font-family="Arial" text-anchor="end">${fmt(r.proj)}</text><text x="310" y="${y+12}" font-size="10" fill="#e8716b" font-family="Arial" text-anchor="end">${fmt(r.act)}</text><text x="400" y="${y+12}" font-size="10" fill="${dc}" font-family="Arial" text-anchor="end">${diff>=0?'+':''}${fmt(diff)}</text>`;}).join('');
+  const topCats=[...catLabels].sort((a,b)=>(s.catMap[b].a||0)-(s.catMap[a].a||0)).slice(0,5);
+  const topSvg=topCats.map((cat,i)=>{const a=s.catMap[cat].a||0,p=s.catMap[cat].p||0,over=a>p;return `<rect x="0" y="${i*26}" width="400" height="22" rx="4" fill="${i%2===0?'#f8fafc':'#fff'}"/><text x="8" y="${i*26+15}" font-size="10" fill="#334155" font-family="Arial">${cat}</text><text x="260" y="${i*26+15}" font-size="10" fill="#185fa5" font-family="Arial" text-anchor="end">${fmt(p)}</text><text x="340" y="${i*26+15}" font-size="10" fill="#e8716b" font-family="Arial" text-anchor="end">${fmt(a)}</text><rect x="350" y="${i*26+6}" width="44" height="14" rx="3" fill="${over?'#fce8e8':'#e8f5ee'}"/><text x="372" y="${i*26+16}" font-size="8" fill="${over?'#c0392b':'#1a7a3a'}" font-family="Arial" text-anchor="middle">${over?'OVER':'OK'}</text>`;}).join('');
+  const totalH=200+incH+40+chartH+40+topCats.length*26+120;
+  const priorBar=`<rect y="160" width="600" height="20" fill="#1a3a5c"/><text x="24" y="174" font-size="10" fill="#a0b8d0" font-family="Arial">Prior Month Balance:</text><text x="200" y="174" font-size="10" font-weight="bold" fill="${prior>=0?'#4ecb71':'#e8716b'}" font-family="Arial">${fmt(prior)} RWF</text>`;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="${totalH}" viewBox="0 0 600 ${totalH}"><rect width="600" height="80" fill="#0f2744"/><text x="24" y="30" font-size="11" fill="#a0b8d0" font-family="Arial">WAXY FINANCIAL STATEMENT</text><text x="24" y="58" font-size="22" font-weight="bold" fill="#f0c050" font-family="Arial">${month} ${year}</text><rect x="430" y="20" width="140" height="42" rx="8" fill="${sc}" opacity=".15"/><rect x="430" y="20" width="140" height="42" rx="8" fill="none" stroke="${sc}" stroke-width="1"/><text x="500" y="37" font-size="9" fill="${sc}" font-family="Arial" text-anchor="middle">BUDGET STATUS</text><text x="500" y="53" font-size="13" font-weight="bold" fill="${sc}" font-family="Arial" text-anchor="middle">${status}</text><rect y="80" width="600" height="80" fill="#f8fafc"/><rect x="16" y="92" width="170" height="56" rx="8" fill="#0f2744"/><text x="101" y="112" font-size="9" fill="#a0b8d0" font-family="Arial" text-anchor="middle">PROJECTED BALANCE</text><text x="101" y="134" font-size="16" font-weight="bold" fill="${pB>=0?'#4ecb71':'#e8716b'}" font-family="Arial" text-anchor="middle">${fmt(pB)}</text><text x="101" y="146" font-size="8" fill="#a0b8d0" font-family="Arial" text-anchor="middle">RWF</text><rect x="214" y="92" width="170" height="56" rx="8" fill="#0f2744"/><text x="299" y="112" font-size="9" fill="#a0b8d0" font-family="Arial" text-anchor="middle">ACTUAL BALANCE</text><text x="299" y="134" font-size="16" font-weight="bold" fill="${aB>=0?'#4ecb71':'#e8716b'}" font-family="Arial" text-anchor="middle">${fmt(aB)}</text><text x="299" y="146" font-size="8" fill="#a0b8d0" font-family="Arial" text-anchor="middle">RWF</text><rect x="412" y="92" width="170" height="56" rx="8" fill="#0f2744"/><text x="497" y="112" font-size="9" fill="#a0b8d0" font-family="Arial" text-anchor="middle">BALANCE DIFFERENCE</text><text x="497" y="134" font-size="16" font-weight="bold" fill="${dB>=0?'#4ecb71':'#e8716b'}" font-family="Arial" text-anchor="middle">${fmt(dB)}</text><text x="497" y="146" font-size="8" fill="#a0b8d0" font-family="Arial" text-anchor="middle">RWF</text>${priorBar}<rect y="180" width="600" height="22" fill="#e8f0f8"/><text x="24" y="195" font-size="11" font-weight="bold" fill="#0f2744" font-family="Arial">INCOME BREAKDOWN</text><text x="210" y="195" font-size="9" fill="#185fa5" font-family="Arial" text-anchor="end">PROJECTED</text><text x="310" y="195" font-size="9" fill="#e8716b" font-family="Arial" text-anchor="end">ACTUAL</text><text x="400" y="195" font-size="9" fill="#6b7a8d" font-family="Arial" text-anchor="end">DIFF</text><g transform="translate(24,206)">${incSvg}</g><line x1="24" y1="${202+incH}" x2="424" y2="${202+incH}" stroke="#dde3ea" stroke-width=".5"/><text x="24" y="${202+incH+14}" font-size="10" font-weight="bold" fill="#0f2744" font-family="Arial">Total income</text><text x="210" y="${202+incH+14}" font-size="10" font-weight="bold" fill="#185fa5" font-family="Arial" text-anchor="end">${fmt(s.tIP)}</text><text x="310" y="${202+incH+14}" font-size="10" font-weight="bold" fill="#e8716b" font-family="Arial" text-anchor="end">${fmt(s.tIA)}</text><rect y="${202+incH+30}" width="600" height="22" fill="#e8f0f8"/><text x="24" y="${202+incH+46}" font-size="11" font-weight="bold" fill="#0f2744" font-family="Arial">EXPENSES BY CATEGORY</text><g transform="translate(24,${202+incH+58})">${catRows}</g><rect y="${202+incH+58+chartH+20}" width="600" height="22" fill="#e8f0f8"/><text x="24" y="${202+incH+58+chartH+36}" font-size="11" font-weight="bold" fill="#0f2744" font-family="Arial">TOP EXPENSE CATEGORIES</text><text x="260" y="${202+incH+58+chartH+36}" font-size="9" fill="#185fa5" font-family="Arial" text-anchor="end">PROJECTED</text><text x="340" y="${202+incH+58+chartH+36}" font-size="9" fill="#e8716b" font-family="Arial" text-anchor="end">ACTUAL</text><g transform="translate(96,${202+incH+58+chartH+46})">${topSvg}</g><rect y="${totalH-36}" width="600" height="36" fill="#0f2744"/><text x="24" y="${totalH-16}" font-size="9" fill="#a0b8d0" font-family="Arial">Waxy Financial Statement</text><text x="576" y="${totalH-16}" font-size="9" fill="#a0b8d0" font-family="Arial" text-anchor="end">All amounts in RWF</text></svg>`;
+  const blob=new Blob([svg],{type:'image/svg+xml'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`Waxy_${month}_${year}.svg`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('Report downloaded ✓');
+}
+
+// ─── BOOT ──────────────────────────────────────────────────────
+(function boot(){
+  currentMonthKey = null; // ensure clean start so switchMonth doesn't save empty data
+  switchMonth();
+  const saved = localStorage.getItem('waxy_od_token');
+  if(saved){
+    accessToken = saved;
+    fetch('https://graph.microsoft.com/v1.0/me',{headers:{'Authorization':'Bearer '+saved}})
+      .then(r=>r.ok?r.json():null)
+      .then(me=>{
+        if(me) renderSyncPanel(true, me.userPrincipalName||me.mail||'');
+        else{accessToken=null;localStorage.removeItem('waxy_od_token');renderSyncPanel(false);}
+      })
+      .catch(()=>renderSyncPanel(false));
+  } else {
+    renderSyncPanel(false);
+  }
+})();
+</script>
+</body>
+</html>
